@@ -2,15 +2,18 @@
 .btn-buy,
 .btn-dark,
 .btn-rounded-ghost,
+.theme-toggle,
 .copy-btn {
   transition-property: scale, background-color, color, border-color;
-  transition-duration: 150ms;
+  transition-duration: var(--motion-quick);
   transition-timing-function: var(--ease-out);
 }
 
 .btn-buy:active,
 .btn-dark:active,
+.btn-ghost:active,
 .btn-rounded-ghost:active,
+.theme-toggle:active,
 .copy-btn:active {
   scale: 0.96;
 }
@@ -35,7 +38,7 @@
 }
 
 .btn-buy:hover {
-  background: #0077ed;
+  background: var(--color-azure-hover);
   color: var(--color-snow);
   text-decoration: none;
 }
@@ -63,6 +66,13 @@
   text-decoration: none;
 }
 
+.btn-ghost,
+.btn-rounded-ghost {
+  transition-property: color, background-color, scale;
+  transition-duration: var(--motion-quick);
+  transition-timing-function: var(--ease-out);
+}
+
 .btn-ghost {
   display: inline-flex;
   align-items: center;
@@ -77,9 +87,6 @@
   min-height: 44px;
   text-decoration: none;
   cursor: pointer;
-  transition-property: color, background-color;
-  transition-duration: 150ms;
-  transition-timing-function: var(--ease-out);
 }
 
 .btn-ghost:hover {
@@ -134,9 +141,10 @@
   padding: var(--card-padding);
   box-shadow: none;
   list-style: none;
-  transition-property: transform, background-color;
-  transition-duration: 150ms;
-  transition-timing-function: var(--ease-out);
+  transition:
+    transform var(--motion-quick) var(--ease-out),
+    background-color var(--motion-base) var(--motion-ease),
+    border-color var(--motion-base) var(--motion-ease);
 }
 
 .card:hover {
@@ -158,6 +166,10 @@
 .card--dark {
   background: var(--surface-dark-stage);
   color: var(--color-snow);
+}
+
+[data-theme="dark"] .card--dark {
+  border: 1px solid var(--color-silver-mist);
 }
 
 .card--dark h3,
@@ -257,7 +269,7 @@
   align-items: center;
   font-family: var(--font-sf-pro-text);
   font-size: var(--text-body-sm);
-  color: rgba(0, 0, 0, 0.56);
+  color: var(--color-frosted-text);
   background: var(--surface-frosted-control);
   border-radius: var(--radius-roundedbuttons);
   backdrop-filter: blur(20px);

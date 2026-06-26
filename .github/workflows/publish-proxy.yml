@@ -33,5 +33,5 @@ jobs:
           push: true
           tags: |
             ghcr.io/bhargavms/mogra-proxy:${{ github.sha }}
-            ghcr.io/bhargavms/mogra-proxy:1.0.0
+            ghcr.io/bhargavms/mogra-proxy:1.1.0
             ghcr.io/bhargavms/mogra-proxy:latest

@@ -7,7 +7,9 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -98,6 +100,7 @@ func main() {
 	mux.HandleFunc("GET /api/github/repo/{owner}/{name}", s.handleGitHubRepo)
 	mux.HandleFunc("GET /api/stackoverflow/answers", s.handleSOAnswers)
 	mux.HandleFunc("GET /api/stackoverflow/questions", s.handleSOQuestions)
+	mux.HandleFunc("GET /api/stackoverflow/summary", s.handleSOSummary)
 
 	port := envOr("PORT", defaultPort)
 	log.Printf("mogra-proxy listening on :%s (cache TTL: %s)", port, ttl)
@@ -177,6 +180,155 @@ func (s *server) handleSOQuestions(w http.ResponseWriter, r *http.Request) {
 	url := "https://api.stackexchange.com/2.3/users/" + s.soUserID +
 		"/questions?order=desc&sort=votes&site=stackoverflow&pagesize=" + pagesize
 	s.proxyJSON(w, r, "so:questions:"+pagesize, url, nil)
+}
+
+var soPrivileges = []struct {
+	Rep  int
+	Name string
+}{
+	{15, "Vote up"},
+	{50, "Comment everywhere"},
+	{125, "Vote down"},
+	{500, "Access review queues"},
+	{1000, "See vote counts"},
+	{2000, "Edit community wiki"},
+	{3000, "Create tags"},
+	{5000, "Access site analytics"},
+	{10000, "Access moderator tools"},
+	{15000, "Protect questions"},
+	{20000, "Trusted user"},
+	{25000, "Access to vote counts"},
+}
+
+func (s *server) handleSOSummary(w http.ResponseWriter, r *http.Request) {
+	cacheKey := "so:summary:v2"
+	if body, ok := s.cache.get(cacheKey); ok {
+		writeJSON(w, body)
+		return
+	}
+
+	ctx := r.Context()
+	userParams := url.Values{}
+	userParams.Set("site", "stackoverflow")
+	userParams.Set("filter", "!-*f(6q9Y*ecs")
+	userURL := "https://api.stackexchange.com/2.3/users/" + s.soUserID + "?" + userParams.Encode()
+
+	userBody, status, err := s.fetchURL(ctx, userURL, nil)
+	if err != nil || status >= 400 {
+		http.Error(w, "failed to fetch user profile", http.StatusBadGateway)
+		return
+	}
+
+	var userPayload struct {
+		Items []map[string]any `json:"items"`
+	}
+	if err := json.Unmarshal(userBody, &userPayload); err != nil || len(userPayload.Items) == 0 {
+		http.Error(w, "invalid user profile", http.StatusBadGateway)
+		return
+	}
+	user := userPayload.Items[0]
+
+	base := "https://api.stackexchange.com/2.3/users/" + s.soUserID
+	siteQuery := "site=stackoverflow"
+
+	tagBody, _, _ := s.fetchURL(ctx, base+"/tags?"+siteQuery+"&pagesize=1&order=desc&sort=popular", nil)
+	var tagPayload struct {
+		Items []map[string]any `json:"items"`
+	}
+	_ = json.Unmarshal(tagBody, &tagPayload)
+
+	reputation, _ := user["reputation"].(float64)
+	repChangeWeek, _ := user["reputation_change_week"].(float64)
+	profileLink, _ := user["link"].(string)
+
+	var topTag map[string]any
+	if len(tagPayload.Items) > 0 {
+		item := tagPayload.Items[0]
+		name, _ := item["name"].(string)
+		count, _ := item["count"].(float64)
+		topTag = map[string]any{"name": name, "count": int(count)}
+	}
+
+	nextPrivilege := nextSOPrivilege(int(reputation))
+	peopleReached := scrapePeopleReached(ctx, s, profileLink)
+
+	summary := map[string]any{
+		"reputation":             int(reputation),
+		"reputation_change_week": int(repChangeWeek),
+		"top_tag":                topTag,
+		"next_privilege":         nextPrivilege,
+		"people_reached":         peopleReached,
+		"profile_link":           profileLink,
+	}
+
+	out, err := json.Marshal(summary)
+	if err != nil {
+		http.Error(w, "failed to encode summary", http.StatusInternalServerError)
+		return
+	}
+
+	s.cache.set(cacheKey, out)
+	writeJSON(w, out)
+}
+
+func nextSOPrivilege(reputation int) map[string]any {
+	for _, p := range soPrivileges {
+		if reputation < p.Rep {
+			progress := float64(reputation) / float64(p.Rep)
+			if progress > 1 {
+				progress = 1
+			}
+			return map[string]any{
+				"name":     p.Name,
+				"rep":      p.Rep,
+				"progress": progress,
+			}
+		}
+	}
+	last := soPrivileges[len(soPrivileges)-1]
+	return map[string]any{
+		"name":     last.Name,
+		"rep":      last.Rep,
+		"progress": 1.0,
+	}
+}
+
+var (
+	peopleReachedPattern = regexp.MustCompile(`(?is)>\s*([~]?[\d,.]+[kmb]?)\s*</div>\s*reached`)
+	peopleReachedFallback = regexp.MustCompile(`(?is)people viewed helpful posts.*?>\s*([~]?[\d,.]+[kmb]?)\s*</div>\s*reached`)
+)
+
+func scrapePeopleReached(ctx context.Context, s *server, profileURL string) string {
+	if profileURL == "" {
+		return ""
+	}
+
+	body, status, err := s.fetchURL(ctx, profileURL, http.Header{
+		"User-Agent":      []string{"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"},
+		"Accept":          []string{"text/html,application/xhtml+xml"},
+		"Accept-Language": []string{"en-US,en;q=0.9"},
+	})
+	if err != nil || status >= 400 {
+		return ""
+	}
+
+	var match []byte
+	if m := peopleReachedPattern.FindSubmatch(body); len(m) >= 2 {
+		match = m[1]
+	} else if m := peopleReachedFallback.FindSubmatch(body); len(m) >= 2 {
+		match = m[1]
+	} else {
+		return ""
+	}
+
+	value := strings.TrimSpace(string(match))
+	if value == "" {
+		return ""
+	}
+	if !strings.HasPrefix(value, "~") {
+		value = "~" + value
+	}
+	return value
 }
 
 func (s *server) githubHeaders() http.Header {

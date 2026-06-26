@@ -23,13 +23,22 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  transition:
+    background-color var(--motion-base) var(--motion-ease),
+    color var(--motion-base) var(--motion-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    transition: none;
+  }
 }
 
 img {
   max-width: 100%;
   height: auto;
   display: block;
-  outline: 1px solid rgba(0, 0, 0, 0.1);
+  outline: 1px solid var(--image-outline);
   outline-offset: -1px;
 }
 

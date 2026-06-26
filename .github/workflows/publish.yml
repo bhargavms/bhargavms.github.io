@@ -32,5 +32,5 @@ jobs:
           push: true
           tags: |
             ghcr.io/bhargavms/mogra-site:${{ github.sha }}
-            ghcr.io/bhargavms/mogra-site:3.1.0
+            ghcr.io/bhargavms/mogra-site:3.2.0
             ghcr.io/bhargavms/mogra-site:latest

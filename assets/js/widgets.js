@@ -14,6 +14,15 @@ async function fetchJSON(path) {
   return res.json();
 }
 
+function formatNumber(value) {
+  return new Intl.NumberFormat('en-US').format(value ?? 0);
+}
+
+function signedDelta(value) {
+  if (!value) return '';
+  return value > 0 ? `+${formatNumber(value)}` : formatNumber(value);
+}
+
 function renderProjectCard(project, stats, index = 0) {
   const li = document.createElement('li');
   li.className = 'card card-reveal';
@@ -30,20 +39,57 @@ function renderProjectCard(project, stats, index = 0) {
   return li;
 }
 
-function renderAnswerCard(answer, index = 0) {
-  const li = document.createElement('li');
-  li.className = 'card card-reveal';
-  li.style.animationDelay = `${index * 50}ms`;
-  const votes = answer.score ?? 0;
-  const title = answer.title || `Answer #${answer.answer_id || ''}`;
-  const link = answer.link || (answer.answer_id ? `https://stackoverflow.com/a/${answer.answer_id}` : '#');
-  const excerpt = (answer.excerpt || answer.body || '').replace(/<[^>]+>/g, '').trim();
-  li.innerHTML = `
-    <h3><a href="${link}" target="_blank" rel="noopener">${title}</a></h3>
-    <div class="card-meta"><span class="tabular-nums">▲ ${votes}</span> votes</div>
-    <p>${excerpt ? excerpt.slice(0, 160) + '…' : 'View on Stack Overflow'}</p>
+function renderSOSummary(summary) {
+  const repChange = summary.reputation_change_week;
+  const repChangeHTML = repChange
+    ? `<span class="so-delta so-delta--positive">${signedDelta(repChange)}</span>`
+    : '';
+  const topTag = summary.top_tag;
+  const topTagHTML = topTag
+    ? `<div class="so-summary-meta">
+        <span class="so-summary-meta__label">Top tag</span>
+        <span class="so-tag">${topTag.name}</span>
+        <span class="so-summary-meta__value tabular-nums">${formatNumber(topTag.count)} answers</span>
+      </div>`
+    : '';
+  const privilege = summary.next_privilege;
+  const privilegePct = Math.round((privilege?.progress ?? 0) * 100);
+  const privilegeHTML = privilege
+    ? `<div class="so-progress">
+        <div class="so-progress__header">
+          <span class="so-progress__label">Next privilege</span>
+          <span class="so-progress__target tabular-nums">${formatNumber(privilege.rep)} rep</span>
+        </div>
+        <div class="so-progress__track" role="progressbar" aria-valuenow="${privilegePct}" aria-valuemin="0" aria-valuemax="100">
+          <div class="so-progress__fill" style="width: ${privilegePct}%"></div>
+        </div>
+        <p class="so-progress__detail">${privilege.name}</p>
+      </div>`
+    : '';
+
+  const peopleReached = summary.people_reached || '—';
+
+  return `
+    <div class="so-summary">
+      <article class="so-summary-card">
+        <p class="so-summary-card__label">Reputation</p>
+        <div class="so-summary-card__hero">
+          <p class="so-stat tabular-nums">${formatNumber(summary.reputation)}</p>
+          ${repChangeHTML}
+        </div>
+        ${topTagHTML}
+        ${privilegeHTML}
+      </article>
+
+      <article class="so-summary-card">
+        <p class="so-summary-card__label">Impact</p>
+        <div class="so-summary-card__hero">
+          <p class="so-stat tabular-nums">${peopleReached}</p>
+        </div>
+        <p class="so-impact-label">people reached</p>
+      </article>
+    </div>
   `;
-  return li;
 }
 
 async function loadProjects() {
@@ -85,18 +131,28 @@ async function loadStackOverflow() {
   if (!container) return;
 
   try {
-    const data = await fetchJSON('/stackoverflow/answers?pagesize=5');
-    const items = data.items || [];
-    if (items.length === 0) {
-      container.innerHTML = '<p class="widget-loading">No answers found.</p>';
-      return;
+    const summary = await fetchJSON('/stackoverflow/summary');
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'so-section';
+
+    const summaryEl = document.createElement('div');
+    summaryEl.innerHTML = renderSOSummary(summary);
+    wrapper.appendChild(summaryEl.firstElementChild);
+
+    if (summary.profile_link) {
+      const profileLink = document.createElement('a');
+      profileLink.className = 'so-profile-link';
+      profileLink.href = summary.profile_link;
+      profileLink.target = '_blank';
+      profileLink.rel = 'noopener';
+      profileLink.textContent = 'View full profile →';
+      wrapper.appendChild(profileLink);
     }
-    const list = document.createElement('ul');
-    list.className = 'card-grid';
-    list.replaceChildren(...items.map((item, index) => renderAnswerCard(item, index)));
-    container.replaceChildren(list);
+
+    container.replaceChildren(wrapper);
   } catch (err) {
-    container.innerHTML = `<p class="widget-error">Could not load Stack Overflow answers: ${err.message}</p>`;
+    container.innerHTML = `<p class="widget-error">Could not load Stack Overflow: ${err.message}</p>`;
   }
 }
 
