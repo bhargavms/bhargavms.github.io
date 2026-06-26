@@ -1,5 +1,61 @@
 .resume-actions {
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-32);
+}
+
+.resume-page h1 {
+  margin-top: 0;
+  font-family: var(--font-sf-pro-display);
+  font-size: var(--text-heading-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--leading-heading-lg);
+  letter-spacing: var(--tracking-heading-lg);
+  color: var(--color-ink);
+}
+
+.resume-page .tagline {
+  font-family: var(--font-sf-pro-text);
+  font-size: var(--text-subheading);
+  font-weight: var(--font-weight-light);
+  line-height: var(--leading-subheading);
+  letter-spacing: var(--tracking-subheading);
+  color: var(--color-ink);
+  margin: 0 0 var(--spacing-16);
+}
+
+.resume-contact {
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body-sm);
+  color: var(--color-graphite);
+  margin-bottom: var(--spacing-32);
+}
+
+.resume-contact a {
+  color: var(--color-cobalt-link);
+}
+
+.resume-section-block {
+  margin-bottom: var(--spacing-40);
+}
+
+.resume-section-block h2 {
+  font-family: var(--font-sf-pro-text);
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--leading-caption);
+  letter-spacing: var(--tracking-caption);
+  text-transform: uppercase;
+  color: var(--color-graphite);
+  border-bottom: 1px solid var(--color-silver-mist);
+  padding-bottom: var(--spacing-8);
+  margin-bottom: var(--spacing-16);
+}
+
+.resume-section-block h3 {
+  font-family: var(--font-sf-pro-display);
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-ink);
+  margin: var(--spacing-16) 0 var(--spacing-8);
 }
 
 @media print {
@@ -12,8 +68,8 @@
   }
 
   body {
-    background: #fff;
-    color: #111;
+    background: var(--color-snow);
+    color: var(--color-ink);
     font-size: 11pt;
   }
 
@@ -24,7 +80,7 @@
   .resume-page h1,
   .resume-page h2,
   .resume-page h3 {
-    color: #111;
+    color: var(--color-ink);
     page-break-after: avoid;
   }
 
@@ -33,38 +89,12 @@
   }
 
   .resume-page a {
-    color: #111;
+    color: var(--color-ink);
     text-decoration: none;
   }
 
   .skill-tag {
-    border-color: #ccc;
-    color: #333;
+    background: var(--surface-recessed);
+    color: var(--color-graphite);
   }
-}
-
-.resume-page h1 {
-  margin-top: 0;
-}
-
-.resume-contact {
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin-bottom: 1.5rem;
-}
-
-.resume-section-block {
-  margin-bottom: 2rem;
-}
-
-.resume-section-block h2 {
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--accent);
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 0.35rem;
-  margin-bottom: 1rem;
 }

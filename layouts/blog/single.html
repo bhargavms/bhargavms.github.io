@@ -1,6 +1,6 @@
 {{ define "main" }}
 <article class="prose">
-  <h1>{{ .Title }}</h1>
+  <h1 class="page-title">{{ .Title }}</h1>
   <div class="card-meta">{{ .Date.Format "January 2, 2006" }}{{ with .ReadingTime }} &middot; {{ . }} min read{{ end }}</div>
   {{ with .Params.tags }}
     <ul class="tag-list">

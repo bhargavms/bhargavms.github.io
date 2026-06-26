@@ -5,9 +5,13 @@
 <link rel="canonical" href="{{ .Permalink }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-{{ $main := resources.Get "css/main.css" | minify | fingerprint }}
-<link rel="stylesheet" href="{{ $main.RelPermalink }}">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+{{ $tokens := resources.Get "css/tokens.css" }}
+{{ $base := resources.Get "css/base.css" }}
+{{ $components := resources.Get "css/components.css" }}
+{{ $main := resources.Get "css/main.css" }}
+{{ $bundle := slice $tokens $base $components $main | resources.Concat "css/bundle.css" | minify | fingerprint }}
+<link rel="stylesheet" href="{{ $bundle.RelPermalink }}">
 {{ if eq .Type "resume" }}
   {{ $resume := resources.Get "css/resume.css" | minify | fingerprint }}
   <link rel="stylesheet" href="{{ $resume.RelPermalink }}">

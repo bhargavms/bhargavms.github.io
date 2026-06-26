@@ -1,5 +1,5 @@
 .page-terminal {
-  font-family: var(--font-mono);
+  /* Page text stays light-theme; only terminal blocks go dark */
 }
 
 .page-terminal .prose {
@@ -7,13 +7,14 @@
 }
 
 .page-terminal .terminal-prompt {
-  color: var(--accent);
-  margin-bottom: 0.5rem;
+  font-family: var(--font-mono);
+  color: var(--color-cobalt-link);
+  margin-bottom: var(--spacing-8);
 }
 
 .page-terminal .terminal-prompt::before {
   content: '~/bhargav $ ';
-  color: #7ee787;
+  color: #34c759;
 }
 
 .page-terminal h1,
@@ -23,37 +24,40 @@
 }
 
 .page-terminal .ascii-divider {
-  color: var(--text-muted);
-  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  color: var(--color-graphite);
+  font-size: var(--text-caption);
   letter-spacing: -0.05em;
   overflow: hidden;
   white-space: nowrap;
-  margin: 1.5rem 0;
+  margin: var(--spacing-24) 0;
 }
 
 .page-terminal .terminal-block {
-  background: #0d1117;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1rem 1.25rem;
-  margin: 1rem 0;
+  font-family: var(--font-mono);
+  background: var(--surface-dark-stage);
+  border: none;
+  border-radius: var(--radius-cards);
+  padding: var(--spacing-16) var(--spacing-20);
+  margin: var(--spacing-16) 0;
   overflow-x: auto;
 }
 
 .page-terminal .terminal-block .comment {
-  color: #8b949e;
+  color: var(--color-graphite);
 }
 
 .page-terminal .terminal-block .cmd {
-  color: #79c0ff;
+  color: #64d2ff;
 }
 
 .page-terminal .terminal-block .output {
-  color: #7ee787;
+  color: #34c759;
 }
 
 .page-terminal .flow-diagram {
-  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-body-sm);
   line-height: 1.4;
-  color: var(--text-muted);
+  color: var(--color-graphite);
 }

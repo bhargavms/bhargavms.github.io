@@ -2,8 +2,8 @@
 {{ $resume := hugo.Data.resume }}
 <article class="resume-page">
   <div class="resume-actions btn-row">
-    <button class="btn" type="button" onclick="window.print()">Download PDF</button>
-    <a class="btn" href="{{ "/about/" | relURL }}">Full About</a>
+    <button class="btn-buy" type="button" onclick="window.print()">Download PDF</button>
+    <a class="btn-ghost" href="{{ "/about/" | relURL }}">Full About</a>
   </div>
 
   <h1>{{ $resume.name }}</h1>
@@ -18,7 +18,7 @@
   <div class="resume-section-block">
     <h2>Summary</h2>
     {{ range $resume.summary }}
-      <p>{{ . }}</p>
+      <p class="t-body t-muted">{{ . }}</p>
     {{ end }}
   </div>
 

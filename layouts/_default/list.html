@@ -1,6 +1,6 @@
 {{ define "main" }}
-<h1>{{ .Title }}</h1>
-{{ .Content }}
+<h1 class="page-title">{{ .Title }}</h1>
+<div class="prose">{{ .Content }}</div>
 <ul class="card-grid">
   {{ range .Pages.ByDate.Reverse }}
     <li class="card">

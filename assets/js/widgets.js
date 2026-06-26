@@ -14,31 +14,33 @@ async function fetchJSON(path) {
   return res.json();
 }
 
-function renderProjectCard(project, stats) {
+function renderProjectCard(project, stats, index = 0) {
   const li = document.createElement('li');
-  li.className = 'card';
+  li.className = 'card card-reveal';
+  li.style.animationDelay = `${index * 50}ms`;
   const stars = stats.stargazers_count ?? 0;
   const lang = stats.language ?? '—';
   const desc = stats.description || project.description;
   li.innerHTML = `
     <h3><a href="https://github.com/${project.repo}" target="_blank" rel="noopener">${project.name}</a></h3>
-    <div class="card-meta">★ ${stars} &middot; ${lang}</div>
+    <div class="card-meta"><span class="tabular-nums">★ ${stars}</span> &middot; ${lang}</div>
     <p>${desc}</p>
     ${project.tags ? `<ul class="tag-list">${project.tags.map(t => `<li>${t}</li>`).join('')}</ul>` : ''}
   `;
   return li;
 }
 
-function renderAnswerCard(answer) {
+function renderAnswerCard(answer, index = 0) {
   const li = document.createElement('li');
-  li.className = 'card';
+  li.className = 'card card-reveal';
+  li.style.animationDelay = `${index * 50}ms`;
   const votes = answer.score ?? 0;
   const title = answer.title || `Answer #${answer.answer_id || ''}`;
   const link = answer.link || (answer.answer_id ? `https://stackoverflow.com/a/${answer.answer_id}` : '#');
   const excerpt = (answer.excerpt || answer.body || '').replace(/<[^>]+>/g, '').trim();
   li.innerHTML = `
     <h3><a href="${link}" target="_blank" rel="noopener">${title}</a></h3>
-    <div class="card-meta">▲ ${votes} votes</div>
+    <div class="card-meta"><span class="tabular-nums">▲ ${votes}</span> votes</div>
     <p>${excerpt ? excerpt.slice(0, 160) + '…' : 'View on Stack Overflow'}</p>
   `;
   return li;
@@ -54,14 +56,15 @@ async function loadProjects() {
     const projects = config.featured || [];
 
     const results = await Promise.all(
-      projects.map(async (p) => {
+      projects.map(async (p, index) => {
         try {
           const [owner, name] = p.repo.split('/');
           const stats = await fetchJSON(`/github/repo/${owner}/${name}`);
-          return renderProjectCard(p, stats);
+          return renderProjectCard(p, stats, index);
         } catch {
           const li = document.createElement('li');
-          li.className = 'card';
+          li.className = 'card card-reveal';
+          li.style.animationDelay = `${index * 50}ms`;
           li.innerHTML = `
             <h3><a href="https://github.com/${p.repo}" target="_blank" rel="noopener">${p.name}</a></h3>
             <p>${p.description}</p>
@@ -90,7 +93,7 @@ async function loadStackOverflow() {
     }
     const list = document.createElement('ul');
     list.className = 'card-grid';
-    list.replaceChildren(...items.map(renderAnswerCard));
+    list.replaceChildren(...items.map((item, index) => renderAnswerCard(item, index)));
     container.replaceChildren(list);
   } catch (err) {
     container.innerHTML = `<p class="widget-error">Could not load Stack Overflow answers: ${err.message}</p>`;

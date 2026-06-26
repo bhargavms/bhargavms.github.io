@@ -1,19 +1,19 @@
 {{ define "main" }}
 <section class="hero">
-  <h1>{{ .Site.Params.author }}</h1>
-  <p class="tagline">{{ hugo.Data.site.tagline }}</p>
-  <div class="hero-summary">
+  <p class="eyebrow t-eyebrow stagger-item">{{ hugo.Data.site.tagline }}</p>
+  <h1 class="t-display stagger-item">{{ .Site.Params.author }}</h1>
+  <div class="hero-summary stagger-item">
     {{ range hugo.Data.site.summary }}
       <p>{{ . }}</p>
     {{ end }}
   </div>
-  <div class="btn-row">
-    <a class="btn" href="{{ "/resume/" | relURL }}">View Resume</a>
-    <a class="btn" href="{{ "/projects/" | relURL }}">See Projects</a>
+  <div class="btn-row stagger-item">
+    <a class="btn-buy" href="{{ "/resume/" | relURL }}">View Resume</a>
+    <a class="btn-ghost" href="{{ "/projects/" | relURL }}">See Projects</a>
   </div>
 </section>
 
-<section>
+<section class="section--snow">
   <p class="section-title">Featured Projects</p>
   <h2 class="section-heading">Open Source &amp; Tools</h2>
   <div id="featured-projects" class="card-grid" data-widget="projects">
@@ -33,10 +33,10 @@
       </li>
     {{ end }}
   </ul>
-  <a class="btn" href="{{ "/blog/" | relURL }}">All posts</a>
+  <a class="btn-ghost btn-ghost--link" href="{{ "/blog/" | relURL }}">All posts &rarr;</a>
 </section>
 
-<section>
+<section class="section--snow">
   <p class="section-title">Community</p>
   <h2 class="section-heading">Top Stack Overflow Answers</h2>
   <div id="stackoverflow-answers" data-widget="stackoverflow">
