@@ -1,0 +1,17 @@
+{
+  "name": "mogra-site-tooling",
+  "private": true,
+  "description": "Release tooling for mogra-site and mogra-proxy",
+  "scripts": {
+    "release:site": "semantic-release --extends ./.releaserc.site.json",
+    "release:proxy": "semantic-release --extends ./.releaserc.proxy.json"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/github": "^11.0.6",
+    "@semantic-release/release-notes-generator": "^14.1.0",
+    "semantic-release": "^24.2.9"
+  }
+}

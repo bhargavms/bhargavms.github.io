@@ -49,3 +49,12 @@ repos:
     rev: v8.24.2
     hooks:
     -   id: gitleaks
+
+-   repo: local
+    hooks:
+    -   id: commitlint
+        name: Conventional Commits (commitlint)
+        entry: npx --no -- commitlint --edit
+        language: system
+        stages: [commit-msg]
+        pass_filenames: true

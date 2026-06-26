@@ -9,7 +9,7 @@ on:
       - '.github/workflows/publish-proxy.yml'
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 jobs:
@@ -17,8 +17,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Release
+        id: semantic
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          semantic_version: 24
+          command: npx semantic-release --extends .releaserc.proxy.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Log in to GHCR
+        if: steps.semantic.outputs.new_release_published == 'true'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -26,12 +45,26 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push
+        if: steps.semantic.outputs.new_release_published == 'true'
         uses: docker/build-push-action@v6
         with:
           context: ./proxy
           file: ./proxy/Dockerfile
           push: true
           tags: |
+            ghcr.io/bhargavms/mogra-proxy:${{ steps.semantic.outputs.new_release_version }}
             ghcr.io/bhargavms/mogra-proxy:${{ github.sha }}
-            ghcr.io/bhargavms/mogra-proxy:1.1.0
             ghcr.io/bhargavms/mogra-proxy:latest
+
+      - name: Install yq
+        if: steps.semantic.outputs.new_release_published == 'true'
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.44.6/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Bump infra manifest
+        if: steps.semantic.outputs.new_release_published == 'true'
+        env:
+          INFRA_DEPLOY_TOKEN: ${{ secrets.INFRA_DEPLOY_TOKEN }}
+        run: |
+          bash scripts/bump-infra-image.sh proxy "${{ steps.semantic.outputs.new_release_version }}"
