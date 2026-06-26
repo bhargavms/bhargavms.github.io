@@ -44,3 +44,8 @@ repos:
         description: Check for files with names that would conflict on a case-insensitive filesystem.
         entry: check-case-conflict
         language: python
+
+-   repo: https://github.com/gitleaks/gitleaks
+    rev: v8.24.2
+    hooks:
+    -   id: gitleaks
