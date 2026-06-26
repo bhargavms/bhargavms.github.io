@@ -1,11 +1,12 @@
-name: Publish mogra-site image
+name: Publish mogra-proxy image
 
 on:
   push:
     branches:
       - main
-    paths-ignore:
+    paths:
       - 'proxy/**'
+      - '.github/workflows/publish-proxy.yml'
 
 permissions:
   contents: read
@@ -27,10 +28,10 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: Dockerfile
+          context: ./proxy
+          file: ./proxy/Dockerfile
           push: true
           tags: |
-            ghcr.io/bhargavms/mogra-site:${{ github.sha }}
-            ghcr.io/bhargavms/mogra-site:2.0.1
-            ghcr.io/bhargavms/mogra-site:latest
+            ghcr.io/bhargavms/mogra-proxy:${{ github.sha }}
+            ghcr.io/bhargavms/mogra-proxy:1.0.0
+            ghcr.io/bhargavms/mogra-proxy:latest

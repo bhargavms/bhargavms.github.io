@@ -1,0 +1,51 @@
+{{ define "main" }}
+<section class="hero">
+  <h1>{{ .Site.Params.author }}</h1>
+  <p class="tagline">{{ hugo.Data.site.tagline }}</p>
+  <div class="hero-summary">
+    {{ range hugo.Data.site.summary }}
+      <p>{{ . }}</p>
+    {{ end }}
+  </div>
+  <div class="btn-row">
+    <a class="btn" href="{{ "/resume/" | relURL }}">View Resume</a>
+    <a class="btn" href="{{ "/projects/" | relURL }}">See Projects</a>
+  </div>
+</section>
+
+<section>
+  <p class="section-title">Featured Projects</p>
+  <h2 class="section-heading">Open Source &amp; Tools</h2>
+  <div id="featured-projects" class="card-grid" data-widget="projects">
+    <p class="widget-loading">Loading project stats&hellip;</p>
+  </div>
+</section>
+
+<section>
+  <p class="section-title">Recent Writing</p>
+  <h2 class="section-heading">From the Blog</h2>
+  <ul class="card-grid">
+    {{ range first 3 (where .Site.RegularPages "Section" "blog") }}
+      <li class="card">
+        <h3><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
+        <div class="card-meta">{{ .Date.Format "Jan 2, 2006" }}{{ with .ReadingTime }} &middot; {{ . }} min read{{ end }}</div>
+        <p>{{ with .Description }}{{ . }}{{ else }}{{ .Summary | plainify | truncate 140 }}{{ end }}</p>
+      </li>
+    {{ end }}
+  </ul>
+  <a class="btn" href="{{ "/blog/" | relURL }}">All posts</a>
+</section>
+
+<section>
+  <p class="section-title">Community</p>
+  <h2 class="section-heading">Top Stack Overflow Answers</h2>
+  <div id="stackoverflow-answers" data-widget="stackoverflow">
+    <p class="widget-loading">Loading Stack Overflow answers&hellip;</p>
+  </div>
+</section>
+{{ end }}
+
+{{ define "scripts" }}
+  {{ $widgets := resources.Get "js/widgets.js" | minify | fingerprint }}
+  <script src="{{ $widgets.RelPermalink }}" defer></script>
+{{ end }}

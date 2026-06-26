@@ -1,0 +1,66 @@
+{{ define "main" }}
+{{ $resume := hugo.Data.resume }}
+<article class="resume-page">
+  <div class="resume-actions btn-row">
+    <button class="btn" type="button" onclick="window.print()">Download PDF</button>
+    <a class="btn" href="{{ "/about/" | relURL }}">Full About</a>
+  </div>
+
+  <h1>{{ $resume.name }}</h1>
+  <p class="tagline">{{ $resume.title }}</p>
+  <div class="resume-contact">
+    {{ $resume.location }} &middot;
+    <a href="mailto:{{ $resume.email }}">{{ $resume.email }}</a> &middot;
+    <a href="https://github.com/{{ $resume.github }}">github.com/{{ $resume.github }}</a> &middot;
+    <a href="https://www.linkedin.com/in/{{ $resume.linkedin }}">LinkedIn</a>
+  </div>
+
+  <div class="resume-section-block">
+    <h2>Summary</h2>
+    {{ range $resume.summary }}
+      <p>{{ . }}</p>
+    {{ end }}
+  </div>
+
+  <div class="resume-section-block">
+    <h2>Experience</h2>
+    <div class="timeline">
+      {{ range $resume.experience }}
+        <div class="timeline-item">
+          <h3>{{ .role }} &mdash; {{ .company }}</h3>
+          <div class="timeline-meta">{{ .period }}{{ with .location }} &middot; {{ . }}{{ end }}</div>
+          <ul>
+            {{ range .highlights }}
+              <li>{{ . }}</li>
+            {{ end }}
+          </ul>
+        </div>
+      {{ end }}
+    </div>
+  </div>
+
+  <div class="resume-section-block">
+    <h2>Skills</h2>
+    {{ range $resume.skills }}
+      <h3>{{ .category }}</h3>
+      <div class="skill-grid">
+        {{ range .items }}
+          <span class="skill-tag">{{ . }}</span>
+        {{ end }}
+      </div>
+    {{ end }}
+  </div>
+
+  {{ with $resume.education }}
+    <div class="resume-section-block">
+      <h2>Education</h2>
+      {{ range . }}
+        <div class="timeline-item">
+          <h3>{{ .degree }}</h3>
+          <div class="timeline-meta">{{ .school }} &middot; {{ .period }}</div>
+        </div>
+      {{ end }}
+    </div>
+  {{ end }}
+</article>
+{{ end }}

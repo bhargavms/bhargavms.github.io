@@ -1,0 +1,29 @@
+featured:
+  - name: mappergen
+    repo: bhargavms/mappergen
+    description: Code generation tooling for mapping layers in Kotlin/Android projects.
+    tags:
+      - kotlin
+      - codegen
+
+  - name: better-android-junit-report-aggregator
+    repo: bhargavms/better-android-junit-report-aggregator
+    description: Aggregates Android JUnit test reports for clearer CI feedback.
+    tags:
+      - android
+      - ci
+
+  - name: mogra-toolchain.nvim
+    repo: bhargavms/mogra-toolchain.nvim
+    description: Neovim toolchain configuration for productive development workflows.
+    tags:
+      - neovim
+      - tooling
+
+  - name: kotlin-java-graalvm-app-template
+    repo: bhargavms/kotlin-java-graalvm-app-template
+    description: Production-grade Kotlin project template with GraalVM native image support.
+    tags:
+      - kotlin
+      - graalvm
+      - gradle

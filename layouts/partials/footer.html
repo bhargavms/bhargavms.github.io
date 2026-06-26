@@ -1,0 +1,17 @@
+<footer class="site-footer">
+  <div class="container">
+    <p>&copy; {{ now.Year }} {{ .Site.Params.author }}. All rights reserved.</p>
+    <p>
+      <a href="mailto:{{ .Site.Params.email }}">{{ .Site.Params.email }}</a>
+      &middot;
+      <a href="https://github.com/{{ .Site.Params.github }}" target="_blank" rel="noopener">GitHub</a>
+      &middot;
+      <a href="https://www.linkedin.com/in/{{ .Site.Params.linkedin }}" target="_blank" rel="noopener">LinkedIn</a>
+      &middot;
+      <a href="https://medium.com/@{{ .Site.Params.medium }}" target="_blank" rel="noopener">Medium</a>
+      &middot;
+      <a href="https://stackoverflow.com/users/{{ .Site.Params.stackoverflow }}/bhargav" target="_blank" rel="noopener">Stack Overflow</a>
+    </p>
+    <p>Based in {{ .Site.Params.location }}{{ if .Site.Params.openToRelocation }}, open to relocation{{ end }}</p>
+  </div>
+</footer>

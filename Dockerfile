@@ -1,6 +1,15 @@
+# syntax=docker/dockerfile:1
+
+FROM hugomod/hugo:0.139.4 AS builder
+
+WORKDIR /site
+COPY . .
+RUN hugo --minify
+
 FROM nginxinc/nginx-unprivileged:1.27-alpine
 
-COPY index.html /usr/share/nginx/html/index.html
+COPY --from=builder /site/public/ /usr/share/nginx/html/
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 
 USER 101
 

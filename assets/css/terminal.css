@@ -1,0 +1,59 @@
+.page-terminal {
+  font-family: var(--font-mono);
+}
+
+.page-terminal .prose {
+  max-width: 52rem;
+}
+
+.page-terminal .terminal-prompt {
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.page-terminal .terminal-prompt::before {
+  content: '~/bhargav $ ';
+  color: #7ee787;
+}
+
+.page-terminal h1,
+.page-terminal h2,
+.page-terminal h3 {
+  font-family: var(--font-mono);
+}
+
+.page-terminal .ascii-divider {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  letter-spacing: -0.05em;
+  overflow: hidden;
+  white-space: nowrap;
+  margin: 1.5rem 0;
+}
+
+.page-terminal .terminal-block {
+  background: #0d1117;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.page-terminal .terminal-block .comment {
+  color: #8b949e;
+}
+
+.page-terminal .terminal-block .cmd {
+  color: #79c0ff;
+}
+
+.page-terminal .terminal-block .output {
+  color: #7ee787;
+}
+
+.page-terminal .flow-diagram {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}

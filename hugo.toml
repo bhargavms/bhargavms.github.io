@@ -1,0 +1,69 @@
+baseURL = 'https://mogra.dev/'
+defaultContentLanguage = 'en'
+title = 'Bhargav Mogra'
+enableRobotsTXT = true
+enableGitInfo = false
+
+[pagination]
+  pagerSize = 10
+
+[taxonomies]
+  tag = 'tags'
+
+[outputs]
+  home = ['HTML', 'RSS']
+  section = ['HTML', 'RSS']
+
+[params]
+  description = 'Android developer and infrastructure engineer building reliable mobile platforms.'
+  author = 'Bhargav Mogra'
+  email = 'bhargav521@gmail.com'
+  location = 'Bangkok, Thailand'
+  github = 'bhargavms'
+  linkedin = 'bhargavmogra'
+  medium = 'rituel521'
+  stackoverflow = '4128945'
+  openToRelocation = true
+
+[markup]
+  [markup.highlight]
+    noClasses = false
+    style = 'monokai'
+    lineNos = false
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+
+[menu]
+  [[menu.main]]
+    name = 'About'
+    pageRef = '/about'
+    weight = 1
+  [[menu.main]]
+    name = 'Blog'
+    pageRef = '/blog'
+    weight = 2
+  [[menu.main]]
+    name = 'Projects'
+    pageRef = '/projects'
+    weight = 3
+  [[menu.main]]
+    name = 'Resume'
+    pageRef = '/resume'
+    weight = 4
+  [[menu.main]]
+    name = 'Homelab'
+    pageRef = '/homelab'
+    weight = 5
+  [[menu.main]]
+    name = 'Uses'
+    pageRef = '/uses'
+    weight = 6
+  [[menu.main]]
+    name = 'Now'
+    pageRef = '/now'
+    weight = 7
+
+[sitemap]
+  changefreq = 'monthly'
+  priority = 0.5

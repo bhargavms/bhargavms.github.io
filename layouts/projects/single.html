@@ -1,0 +1,11 @@
+{{ define "main" }}
+<article class="prose">
+  <h1>{{ .Title }}</h1>
+  {{ .Content }}
+</article>
+{{ end }}
+
+{{ define "scripts" }}
+  {{ $widgets := resources.Get "js/widgets.js" | minify | fingerprint }}
+  <script src="{{ $widgets.RelPermalink }}" defer></script>
+{{ end }}
