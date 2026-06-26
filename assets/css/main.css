@@ -14,7 +14,14 @@
   z-index: 100;
   background: var(--surface-canvas);
   border-bottom: 1px solid var(--color-silver-mist);
-  transition: background-color var(--motion-base) var(--motion-ease);
+  transform: translateY(0);
+  transition:
+    transform var(--motion-base) var(--motion-ease),
+    background-color var(--motion-base) var(--motion-ease);
+}
+
+.site-header.is-hidden {
+  transform: translateY(-100%);
 }
 
 .site-header .container {
@@ -88,11 +95,43 @@ main {
   padding: var(--spacing-40) 0 var(--spacing-80);
 }
 
-/* Hero — Apple center-stack lockup */
+/* Hero — Apple center-stack with abstract background */
 .hero {
+  position: relative;
   text-align: center;
   padding: var(--spacing-80) 0 var(--spacing-52);
   margin-bottom: var(--section-gap);
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: calc(-1 * var(--spacing-40));
+  bottom: calc(-1 * var(--section-gap));
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  background-image: url('/images/hero-bg.png');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 45%,
+    rgba(0, 0, 0, 0.75) 62%,
+    rgba(0, 0, 0, 0.35) 78%,
+    transparent 100%
+  );
+          mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 45%,
+    rgba(0, 0, 0, 0.75) 62%,
+    rgba(0, 0, 0, 0.35) 78%,
+    transparent 100%
+  );
 }
 
 .hero .eyebrow {
@@ -445,6 +484,10 @@ section.section--snow {
   .card,
   .card:hover {
     transform: none;
+    transition: none;
+  }
+
+  .site-header {
     transition: none;
   }
 }
