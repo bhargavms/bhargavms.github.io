@@ -25,6 +25,11 @@ enableGitInfo = false
   stackoverflow = '4128945'
   openToRelocation = true
 
+  [params.analytics]
+    enabled = true
+    umamiWebsiteId = ""
+    scriptName = "t.js"
+
 [markup]
   [markup.highlight]
     noClasses = false

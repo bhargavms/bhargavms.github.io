@@ -9,6 +9,7 @@ RUN hugo --minify
 FROM nginxinc/nginx-unprivileged:1.27-alpine
 
 COPY --from=builder /site/public/ /usr/share/nginx/html/
+COPY nginx/rate-limit.conf /etc/nginx/conf.d/rate-limit.conf
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 
 USER 101

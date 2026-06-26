@@ -1,0 +1,6 @@
+{{ with .Site.Params.analytics }}
+  {{ if and .enabled .umamiWebsiteId }}
+<script defer src="/{{ .scriptName | default "t.js" }}"
+        data-website-id="{{ .umamiWebsiteId }}"></script>
+  {{ end }}
+{{ end }}
