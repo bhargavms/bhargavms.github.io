@@ -1,6 +1,6 @@
 featured:
   - name: mappergen
-    repo: bhargavms/mappergen
+    repo: bhargavms/ksp-mappergen
     description: Code generation tooling for mapping layers in Kotlin/Android projects.
     tags:
       - kotlin
