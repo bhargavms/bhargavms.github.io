@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"os"
 	"regexp"
@@ -21,6 +22,7 @@ const (
 	defaultCacheTTL  = 30 * time.Minute
 	defaultGitHubUser = "bhargavms"
 	defaultSOUser    = "4128945"
+	defaultUmamiUpstream = "http://umami.umami.svc.cluster.local:3000"
 )
 
 type cacheEntry struct {
@@ -61,6 +63,7 @@ type server struct {
 	githubUser  string
 	soUserID    string
 	allowedOrigins map[string]struct{}
+	umamiProxy  *httputil.ReverseProxy
 }
 
 func main() {
@@ -85,6 +88,13 @@ func main() {
 		}
 	}
 
+	umamiUpstream := envOr("UMAMI_UPSTREAM", defaultUmamiUpstream)
+	umamiURL, err := url.Parse(umamiUpstream)
+	if err != nil {
+		log.Fatalf("invalid UMAMI_UPSTREAM: %v", err)
+	}
+	umamiProxy := httputil.NewSingleHostReverseProxy(umamiURL)
+
 	s := &server{
 		client:      &http.Client{Timeout: 15 * time.Second},
 		cache:       newCache(ttl),
@@ -92,10 +102,12 @@ func main() {
 		githubUser:  githubUser,
 		soUserID:    soUser,
 		allowedOrigins: origins,
+		umamiProxy:  umamiProxy,
 	}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", s.handleHealth)
+	mux.HandleFunc("POST /api/send", s.handleUmamiSend)
 	mux.HandleFunc("GET /api/github/repos", s.handleGitHubRepos)
 	mux.HandleFunc("GET /api/github/repo/{owner}/{name}", s.handleGitHubRepo)
 	mux.HandleFunc("GET /api/stackoverflow/answers", s.handleSOAnswers)
@@ -119,6 +131,10 @@ func envOr(key, fallback string) string {
 func (s *server) handleHealth(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(`{"status":"ok"}`))
+}
+
+func (s *server) handleUmamiSend(w http.ResponseWriter, r *http.Request) {
+	s.umamiProxy.ServeHTTP(w, r)
 }
 
 func (s *server) handleGitHubRepos(w http.ResponseWriter, r *http.Request) {
