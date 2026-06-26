@@ -201,7 +201,7 @@ var soPrivileges = []struct {
 }
 
 func (s *server) handleSOSummary(w http.ResponseWriter, r *http.Request) {
-	cacheKey := "so:summary:v2"
+	cacheKey := "so:summary:v3"
 	if body, ok := s.cache.get(cacheKey); ok {
 		writeJSON(w, body)
 		return
@@ -251,6 +251,9 @@ func (s *server) handleSOSummary(w http.ResponseWriter, r *http.Request) {
 
 	nextPrivilege := nextSOPrivilege(int(reputation))
 	peopleReached := scrapePeopleReached(ctx, s, profileLink)
+	if peopleReached == "" {
+		peopleReached = s.estimatePeopleReachedFromAPI(ctx)
+	}
 
 	summary := map[string]any{
 		"reputation":             int(reputation),
@@ -294,8 +297,9 @@ func nextSOPrivilege(reputation int) map[string]any {
 }
 
 var (
-	peopleReachedPattern = regexp.MustCompile(`(?is)>\s*([~]?[\d,.]+[kmb]?)\s*</div>\s*reached`)
-	peopleReachedFallback = regexp.MustCompile(`(?is)people viewed helpful posts.*?>\s*([~]?[\d,.]+[kmb]?)\s*</div>\s*reached`)
+	peopleReachedStatsPattern = regexp.MustCompile(`(?is)fs-body3[^>]*>\s*([~]?[\d,.]+[kmb]?)\s*</div>\s*reached`)
+	peopleReachedPattern      = regexp.MustCompile(`(?is)>\s*([~]?[\d,.]+[kmb]?)\s*</div>\s*reached`)
+	peopleReachedFallback     = regexp.MustCompile(`(?is)people viewed helpful posts.*?>\s*([~]?[\d,.]+[kmb]?)\s*</div>\s*reached`)
 )
 
 func scrapePeopleReached(ctx context.Context, s *server, profileURL string) string {
@@ -313,15 +317,22 @@ func scrapePeopleReached(ctx context.Context, s *server, profileURL string) stri
 	}
 
 	var match []byte
-	if m := peopleReachedPattern.FindSubmatch(body); len(m) >= 2 {
-		match = m[1]
-	} else if m := peopleReachedFallback.FindSubmatch(body); len(m) >= 2 {
-		match = m[1]
-	} else {
+	switch {
+	case peopleReachedStatsPattern.Match(body):
+		match = peopleReachedStatsPattern.FindSubmatch(body)[1]
+	case peopleReachedPattern.Match(body):
+		match = peopleReachedPattern.FindSubmatch(body)[1]
+	case peopleReachedFallback.Match(body):
+		match = peopleReachedFallback.FindSubmatch(body)[1]
+	default:
 		return ""
 	}
 
-	value := strings.TrimSpace(string(match))
+	return normalizePeopleReached(string(match))
+}
+
+func normalizePeopleReached(value string) string {
+	value = strings.TrimSpace(value)
 	if value == "" {
 		return ""
 	}
@@ -329,6 +340,101 @@ func scrapePeopleReached(ctx context.Context, s *server, profileURL string) stri
 		value = "~" + value
 	}
 	return value
+}
+
+func (s *server) estimatePeopleReachedFromAPI(ctx context.Context) string {
+	questionIDs := make(map[int]struct{})
+	page := 1
+
+	for {
+		answersURL := fmt.Sprintf(
+			"https://api.stackexchange.com/2.3/users/%s/answers?site=stackoverflow&pagesize=100&page=%d&order=desc&sort=votes&filter=default",
+			s.soUserID, page,
+		)
+		body, status, err := s.fetchURL(ctx, answersURL, nil)
+		if err != nil || status >= 400 {
+			break
+		}
+
+		var payload struct {
+			Items   []map[string]any `json:"items"`
+			HasMore bool             `json:"has_more"`
+		}
+		if err := json.Unmarshal(body, &payload); err != nil {
+			break
+		}
+
+		for _, item := range payload.Items {
+			score, _ := item["score"].(float64)
+			if score <= 0 {
+				continue
+			}
+			if qid, ok := item["question_id"].(float64); ok {
+				questionIDs[int(qid)] = struct{}{}
+			}
+		}
+
+		if !payload.HasMore {
+			break
+		}
+		page++
+	}
+
+	if len(questionIDs) == 0 {
+		return ""
+	}
+
+	ids := make([]string, 0, len(questionIDs))
+	for id := range questionIDs {
+		ids = append(ids, strconv.Itoa(id))
+	}
+
+	totalViews := 0
+	for i := 0; i < len(ids); i += 100 {
+		end := i + 100
+		if end > len(ids) {
+			end = len(ids)
+		}
+		questionsURL := "https://api.stackexchange.com/2.3/questions/" +
+			strings.Join(ids[i:end], ";") + "?site=stackoverflow&filter=default"
+		body, status, err := s.fetchURL(ctx, questionsURL, nil)
+		if err != nil || status >= 400 {
+			continue
+		}
+
+		var questions struct {
+			Items []map[string]any `json:"items"`
+		}
+		if err := json.Unmarshal(body, &questions); err != nil {
+			continue
+		}
+		for _, q := range questions.Items {
+			if views, ok := q["view_count"].(float64); ok {
+				totalViews += int(views)
+			}
+		}
+	}
+
+	if totalViews == 0 {
+		return ""
+	}
+	return normalizePeopleReached(formatCompactViews(totalViews))
+}
+
+func formatCompactViews(views int) string {
+	switch {
+	case views >= 1_000_000:
+		if views%1_000_000 == 0 {
+			return fmt.Sprintf("%dm", views/1_000_000)
+		}
+		return fmt.Sprintf("%.1fm", float64(views)/1_000_000)
+	case views >= 10_000:
+		return fmt.Sprintf("%dk", views/1_000)
+	case views >= 1_000:
+		return fmt.Sprintf("%.1fk", float64(views)/1_000)
+	default:
+		return strconv.Itoa(views)
+	}
 }
 
 func (s *server) githubHeaders() http.Header {
