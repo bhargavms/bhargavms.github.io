@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   initThemeToggle();
+  initMobileNav();
   initScrollHeader();
 });
 
@@ -75,6 +76,53 @@ function initThemeToggle() {
   });
 }
 
+function initMobileNav() {
+  const header = document.querySelector('.site-header');
+  const toggle = document.querySelector('.nav-toggle');
+  const nav = document.getElementById('site-nav');
+  const backdrop = document.querySelector('.site-nav-backdrop');
+  if (!header || !toggle || !nav) return;
+
+  const mobileQuery = window.matchMedia('(max-width: 640px)');
+
+  const setNavOpen = (open) => {
+    header.classList.toggle('is-nav-open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    document.body.style.overflow = open && mobileQuery.matches ? 'hidden' : '';
+
+    if (backdrop) {
+      backdrop.setAttribute('aria-hidden', String(!open));
+    }
+
+    if (open && mobileQuery.matches) {
+      nav.querySelector('a')?.focus();
+    } else if (!open && nav.contains(document.activeElement)) {
+      toggle.focus();
+    }
+  };
+
+  const closeNav = () => setNavOpen(false);
+
+  toggle.addEventListener('click', () => {
+    setNavOpen(!header.classList.contains('is-nav-open'));
+  });
+
+  backdrop?.addEventListener('click', closeNav);
+
+  nav.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', closeNav);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeNav();
+  });
+
+  mobileQuery.addEventListener('change', (event) => {
+    if (!event.matches) closeNav();
+  });
+}
+
 function initScrollHeader() {
   const header = document.querySelector('.site-header');
   if (!header || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -89,6 +137,13 @@ function initScrollHeader() {
     const currentScrollY = window.scrollY;
     const delta = currentScrollY - lastScrollY;
     const minScroll = header.offsetHeight;
+
+    if (header.classList.contains('is-nav-open')) {
+      header.classList.remove('is-hidden');
+      lastScrollY = currentScrollY;
+      ticking = false;
+      return;
+    }
 
     if (currentScrollY <= minScroll) {
       header.classList.remove('is-hidden');

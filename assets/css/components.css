@@ -3,6 +3,7 @@
 .btn-dark,
 .btn-rounded-ghost,
 .theme-toggle,
+.nav-toggle,
 .copy-btn {
   transition-property: scale, background-color, color, border-color;
   transition-duration: var(--motion-quick);
@@ -14,6 +15,7 @@
 .btn-ghost:active,
 .btn-rounded-ghost:active,
 .theme-toggle:active,
+.nav-toggle:active,
 .copy-btn:active {
   scale: 0.96;
 }
@@ -149,6 +151,16 @@
 
 .card:hover {
   transform: translateY(-2px);
+}
+
+@media (hover: none) {
+  .card:hover {
+    transform: none;
+  }
+
+  .section--snow .card:hover {
+    background: var(--surface-recessed);
+  }
 }
 
 .section--snow .card {
@@ -319,3 +331,16 @@
 .swatch--blush { background: var(--color-blush-finish); }
 .swatch--citrus { background: var(--color-citrus-finish); }
 .swatch--indigo { background: var(--color-indigo-finish); }
+
+@media (max-width: 640px) {
+  .btn-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-buy,
+  .btn-ghost {
+    justify-content: center;
+    width: 100%;
+  }
+}

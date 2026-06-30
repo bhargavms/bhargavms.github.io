@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "hooks": {
+    "postToolUse": [
+      {
+        "command": ".cursor/hooks/design-check.sh",
+        "matcher": "Write|StrReplace|EditNotebook|ApplyPatch"
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": ".cursor/hooks/design-check.sh"
+      }
+    ],
+    "afterTabFileEdit": [
+      {
+        "command": ".cursor/hooks/design-check.sh"
+      }
+    ]
+  }
+}
